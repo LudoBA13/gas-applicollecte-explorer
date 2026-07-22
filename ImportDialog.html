@@ -11,9 +11,10 @@
 				{
 					const data = e.target.result;
 					const base64 = data.split(',')[1];
+					const functionName = '<?= importFunctionName ?>';
 					google.script.run
 						.withSuccessHandler(google.script.host.close)
-						.importAppliCollecte(base64, file.name);
+						[functionName](base64, file.name);
 				};
 				reader.readAsDataURL(file);
 			}
