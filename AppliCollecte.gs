@@ -28,13 +28,16 @@ function importAppliCollecte(base64Data, fileName, sheetsToImport)
 				const existingSheet = targetSpreadsheet.getSheetByName(item.targetName);
 				if (existingSheet)
 				{
-					targetSpreadsheet.deleteSheet(existingSheet);
+					existingSheet.clear();
+					sourceSheet.getDataRange().copyTo(existingSheet.getRange(1, 1));
+					existingSheet.autoResizeColumns(1, existingSheet.getLastColumn());
 				}
-				
-				const newSheet = sourceSheet.copyTo(targetSpreadsheet);
-				newSheet.setName(item.targetName);
-				
-				newSheet.autoResizeColumns(1, newSheet.getLastColumn());
+				else
+				{
+					const newSheet = sourceSheet.copyTo(targetSpreadsheet);
+					newSheet.setName(item.targetName);
+					newSheet.autoResizeColumns(1, newSheet.getLastColumn());
+				}
 			}
 		});
 	}
