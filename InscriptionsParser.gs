@@ -126,24 +126,9 @@ class InscriptionsParser
 			else if (cellB === 'Nom du bénévole ou du responsable')
 			{
 				this.rowIdx++;
-				// Process volunteers until empty line
-				while (this.rowIdx < this.data.length)
+				if (cp.slots.length > 0)
 				{
-					const volRow = this.data[this.rowIdx];
-					const volName = volRow[0] ? volRow[0].toString().trim() : '';
-					const volOrg = volRow[1] ? volRow[1].toString().trim() : '';
-					
-					if (volName === '')
-					{
-						// Empty line ends volunteer list and section
-						return;
-					}
-					
-					if (cp.slots.length > 0)
-					{
-						cp.slots[cp.slots.length - 1].volunteers.push({ name: volName, organization: volOrg });
-					}
-					this.rowIdx++;
+					this.parseVolunteers(cp.slots[cp.slots.length - 1]);
 				}
 			}
 			else
@@ -152,6 +137,25 @@ class InscriptionsParser
 				// it's likely the start of the next Collection Point.
 				return;
 			}
+		}
+	}
+
+	parseVolunteers(slot)
+	{
+		while (this.rowIdx < this.data.length)
+		{
+			const volRow = this.data[this.rowIdx];
+			const volName = volRow[0] ? volRow[0].toString().trim() : '';
+			const volOrg = volRow[1] ? volRow[1].toString().trim() : '';
+			
+			if (volName === '')
+			{
+				// Empty line ends volunteer list and section
+				return;
+			}
+			
+			slot.volunteers.push({ name: volName, organization: volOrg });
+			this.rowIdx++;
 		}
 	}
 
