@@ -15,85 +15,118 @@ class InscriptionsParser
 		const data = this.sheet.getDataRange().offset(0, 1, this.sheet.getLastRow(), this.sheet.getLastColumn() - 1).getValues();
 		
 		const collectionPoints = [];
-		let currentCollectionPoint = null;
-		let currentSlot = null;
+		this.state = {
+			collectionPoints,
+			currentCollectionPoint: null,
+			currentSlot: null
+		};
 
 		data.forEach(row =>
 		{
-			const cellB = row[0] ? row[0].toString().trim() : ''; // This is the content of the sheet's B column
-			const cellC = row[1] ? row[1].toString().trim() : '';
-
-			// Helper to match Responsable fields with inconsistent whitespace
-			const isResponsableSecteur = (text) => /^Responsable\s+secteur\s*:/i.test(text);
-			const isResponsablePC = (text) => /^Responsable\(s\)\s+PC\s*:/i.test(text);
-			const isResponsablePCDedie = (text) => /^Responsable\s+PC\s+dédié\s*:/i.test(text);
-			const isDateSlot = (text) => /^\d{2}\/\d{2}\/\d{4}$/.test(text);
-
-			if (cellB === '')
-			{
-				currentCollectionPoint = null;
-				currentSlot = null;
-				return;
-			}
-
-			if (isDateSlot(cellB))
-			{
-				if (currentCollectionPoint)
-				{
-					currentSlot = {
-						date: cellB,
-						responsablePCDedie: '',
-						volunteers: []
-					};
-					currentCollectionPoint.slots.push(currentSlot);
-				}
-			}
-			else if (isResponsablePCDedie(cellB))
-			{
-				if (currentSlot)
-				{
-					currentSlot.responsablePCDedie = cellC;
-				}
-			}
-			else if (cellB === 'Nom du bénévole ou du responsable')
-			{
-				// Ignore for now
-			}
-			else if (isResponsableSecteur(cellB))
-			{
-				if (currentCollectionPoint)
-				{
-					currentCollectionPoint.responsablesSecteur = cellC;
-				}
-			}
-			else if (isResponsablePC(cellB))
-			{
-				if (currentCollectionPoint)
-				{
-					currentCollectionPoint.responsablesPC = cellC;
-				}
-			}
-			else
-			{
-				// Assume it's a Collection Point Name or Address
-				if (!currentCollectionPoint)
-				{
-					currentCollectionPoint = {
-						name: cellB,
-						address: '',
-						responsablesSecteur: '',
-						responsablesPC: '',
-						slots: []
-					};
-					collectionPoints.push(currentCollectionPoint);
-				}
-				else
-				{
-					currentCollectionPoint.address += (currentCollectionPoint.address ? ', ' : '') + cellB;
-				}
-			}
+			this.processRow(row);
 		});
 
 		return collectionPoints;
+	}
+
+	processRow(row)
+	{
+		const cellB = row[0] ? row[0].toString().trim() : '';
+		const cellC = row[1] ? row[1].toString().trim() : '';
+
+		if (cellB === '')
+		{
+			this.state.currentCollectionPoint = null;
+			this.state.currentSlot = null;
+			return;
+		}
+
+		if (this.isDateSlot(cellB))
+		{
+			this.handleDateSlot(cellB);
+		}
+		else if (this.isResponsablePCDedie(cellB))
+		{
+			this.handleResponsablePCDedie(cellC);
+		}
+		else if (cellB === 'Nom du bénévole ou du responsable')
+		{
+			// Ignore
+		}
+		else if (this.isResponsableSecteur(cellB))
+		{
+			this.handleResponsableSecteur(cellC);
+		}
+		else if (this.isResponsablePC(cellB))
+		{
+			this.handleResponsablePC(cellC);
+		}
+		else
+		{
+			this.handleCollectionPointInfo(cellB);
+		}
+	}
+
+	// Helper methods for matching
+	isResponsableSecteur(text) { return /^Responsable\s+secteur\s*:/i.test(text); }
+	isResponsablePC(text) { return /^Responsable\(s\)\s+PC\s*:/i.test(text); }
+	isResponsablePCDedie(text) { return /^Responsable\s+PC\s+dédié\s*:/i.test(text); }
+	isDateSlot(text) { return /^\d{2}\/\d{2}\/\d{4}$/.test(text); }
+
+	// Handlers for specific logic
+	handleDateSlot(date)
+	{
+		if (this.state.currentCollectionPoint)
+		{
+			this.state.currentSlot = {
+				date: date,
+				responsablePCDedie: '',
+				volunteers: []
+			};
+			this.state.currentCollectionPoint.slots.push(this.state.currentSlot);
+		}
+	}
+
+	handleResponsablePCDedie(name)
+	{
+		if (this.state.currentSlot)
+		{
+			this.state.currentSlot.responsablePCDedie = name;
+		}
+	}
+
+	handleResponsableSecteur(names)
+	{
+		if (this.state.currentCollectionPoint)
+		{
+			this.state.currentCollectionPoint.responsablesSecteur = names;
+		}
+	}
+
+	handleResponsablePC(names)
+	{
+		if (this.state.currentCollectionPoint)
+		{
+			this.state.currentCollectionPoint.responsablesPC = names;
+		}
+	}
+
+	handleCollectionPointInfo(text)
+	{
+		if (!this.state.currentCollectionPoint)
+		{
+			this.state.currentCollectionPoint = {
+				name: text,
+				address: '',
+				responsablesSecteur: '',
+				responsablesPC: '',
+				slots: []
+			};
+			this.state.collectionPoints.push(this.state.currentCollectionPoint);
+		}
+		else
+		{
+			this.state.currentCollectionPoint.address += (this.state.currentCollectionPoint.address ? ', ' : '') + text;
+		}
 	}
 }
