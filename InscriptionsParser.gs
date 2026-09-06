@@ -1,3 +1,10 @@
+function _testParser()
+{
+	const parser = new InscriptionsParser('AppliCollecte-Inscriptions');
+	const data = parser.parse();
+	console.log(JSON.stringify(data, null, 2));
+}
+
 class InscriptionsParser
 {
 	constructor(sheetName)
@@ -31,7 +38,8 @@ class InscriptionsParser
 
 	processRow(row)
 	{
-		const cellB = row[0] ? row[0].toString().trim() : '';
+		const rawCellB = row[0];
+		const cellB = rawCellB ? rawCellB.toString().trim() : '';
 		const cellC = row[1] ? row[1].toString().trim() : '';
 
 		if (cellB === '')
@@ -41,9 +49,9 @@ class InscriptionsParser
 			return;
 		}
 
-		if (this.isDateSlot(cellB))
+		if (this.isDateSlot(rawCellB, cellB))
 		{
-			this.handleDateSlot(cellB);
+			this.handleDateSlot(rawCellB, cellB);
 		}
 		else if (this.isResponsablePCDedie(cellB))
 		{
@@ -71,15 +79,24 @@ class InscriptionsParser
 	isResponsableSecteur(text) { return /^Responsable\s+secteur\s*:/i.test(text); }
 	isResponsablePC(text) { return /^Responsable\(s\)\s+PC\s*:/i.test(text); }
 	isResponsablePCDedie(text) { return /^Responsable\s+PC\s+dédié\s*:/i.test(text); }
-	isDateSlot(text) { return /^\d{2}\/\d{2}\/\d{4}$/.test(text); }
+	isDateSlot(value, text)
+	{
+		return (value instanceof Date) || /^\d{2}\/\d{2}\/\d{4}$/.test(text);
+	}
 
 	// Handlers for specific logic
-	handleDateSlot(date)
+	handleDateSlot(value, text)
 	{
 		if (this.state.currentCollectionPoint)
 		{
+			let dateString = text;
+			if (value instanceof Date)
+			{
+				dateString = Utilities.formatDate(value, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+			}
+			
 			this.state.currentSlot = {
-				date: date,
+				date: dateString,
 				responsablePCDedie: '',
 				volunteers: []
 			};
