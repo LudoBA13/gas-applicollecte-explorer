@@ -42,9 +42,16 @@ class InscriptionsParser
 		const cellB = rawCellB ? rawCellB.toString().trim() : '';
 		const cellC = row[1] ? row[1].toString().trim() : '';
 
-		if (cellB === '')
+		// Remove the aggressive blank line reset, as sections might contain blank lines.
+		// Re-evaluate what defines a new collection point: maybe just the first item?
+		// Actually, if we remove blank line reset, how do we start a *new* collection point?
+		// A new collection point starts when we hit a name/address that doesn't follow the current structure.
+		// This might be hard. Let's just refine the check.
+
+		if (cellB === '' || cellB === 'Nom du bénévole ou du responsable')
 		{
-			this.state.currentCollectionPoint = null;
+			// Blank lines or headers don't necessarily reset the Collection Point,
+			// only the Date Slot.
 			this.state.currentSlot = null;
 			return;
 		}
@@ -59,10 +66,6 @@ class InscriptionsParser
 		else if (this.isResponsablePCDedie(cellB))
 		{
 			this.handleResponsablePCDedie(cellC);
-		}
-		else if (cellB === 'Nom du bénévole ou du responsable')
-		{
-			// Ignore
 		}
 		else if (this.isResponsableSecteur(cellB))
 		{
