@@ -44,7 +44,7 @@ class InscriptionsParser
 
 		if (cellB === '')
 		{
-			this.state.currentSlot = null;
+			// Blank lines do not reset state; just ignore them.
 			return;
 		}
 
