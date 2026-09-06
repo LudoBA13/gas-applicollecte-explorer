@@ -49,7 +49,10 @@ class InscriptionsParser
 			return;
 		}
 
-		if (this.isDateSlot(rawCellB, cellB))
+		const isDate = this.isDateSlot(rawCellB, cellB);
+		console.log(`Row: B='${cellB}', isDate=${isDate}, hasCollectionPoint=${!!this.state.currentCollectionPoint}`);
+
+		if (isDate)
 		{
 			this.handleDateSlot(rawCellB, cellB);
 		}
