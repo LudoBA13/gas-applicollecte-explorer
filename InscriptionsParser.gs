@@ -27,7 +27,7 @@ class InscriptionsParser
 		{
 			const row = this.data[this.rowIdx];
 			const cellB = row[0] ? row[0].toString().trim() : '';
-			
+
 			if (cellB === '')
 			{
 				this.rowIdx++;
@@ -68,24 +68,28 @@ class InscriptionsParser
 			{
 				// Hand off to date slot parser
 				this.parseDateSlotSection(cp);
-				// After slots, we might hit blank lines then next CP.
-				// Returning here keeps structure flat in the main loop.
-				return cp;
 			}
 			else if (this.isResponsableSecteur(cellB))
 			{
 				cp.responsablesSecteur = cellC;
+				this.rowIdx++;
 			}
 			else if (this.isResponsablePC(cellB))
 			{
 				cp.responsablesPC = cellC;
+				this.rowIdx++;
 			}
-			else
+			else if (cp.responsablesSecteur === '' && cp.responsablesPC === '')
 			{
 				// Assume address
 				cp.address += (cp.address ? ', ' : '') + cellB;
+				this.rowIdx++;
 			}
-			this.rowIdx++;
+			else
+			{
+				// It's not a part of this CP (likely a new one)
+				break;
+			}
 		}
 		return cp;
 	}
@@ -147,13 +151,14 @@ class InscriptionsParser
 			const volRow = this.data[this.rowIdx];
 			const volName = volRow[0] ? volRow[0].toString().trim() : '';
 			const volOrg = volRow[1] ? volRow[1].toString().trim() : '';
-			
+
 			if (volName === '')
 			{
 				// Empty line ends volunteer list and section
+				this.rowIdx++;
 				return;
 			}
-			
+
 			slot.volunteers.push({ name: volName, organization: volOrg });
 			this.rowIdx++;
 		}
