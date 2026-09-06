@@ -100,8 +100,9 @@ class InscriptionsParser
 
 			if (cellB === '')
 			{
+				// Empty line ends the date slot section
 				this.rowIdx++;
-				continue;
+				return;
 			}
 
 			if (this.isDateSlot(row[0], cellB))
@@ -112,6 +113,7 @@ class InscriptionsParser
 					volunteers: []
 				};
 				cp.slots.push(slot);
+				this.rowIdx++;
 			}
 			else if (this.isResponsablePCDedie(cellB))
 			{
@@ -119,18 +121,37 @@ class InscriptionsParser
 				{
 					cp.slots[cp.slots.length - 1].responsablePCDedie = cellC;
 				}
+				this.rowIdx++;
 			}
 			else if (cellB === 'Nom du bénévole ou du responsable')
 			{
-				// Ignore
+				this.rowIdx++;
+				// Process volunteers until empty line
+				while (this.rowIdx < this.data.length)
+				{
+					const volRow = this.data[this.rowIdx];
+					const volName = volRow[0] ? volRow[0].toString().trim() : '';
+					const volOrg = volRow[1] ? volRow[1].toString().trim() : '';
+					
+					if (volName === '')
+					{
+						// Empty line ends volunteer list and section
+						return;
+					}
+					
+					if (cp.slots.length > 0)
+					{
+						cp.slots[cp.slots.length - 1].volunteers.push({ name: volName, organization: volOrg });
+					}
+					this.rowIdx++;
+				}
 			}
 			else
 			{
-				// If we hit something else (not a date, not a field of the slot),
-				// it's likely the start of the next Collection Point (or end of all).
+				// If we hit something else (not a date, not a field of the slot, not a volunteer),
+				// it's likely the start of the next Collection Point.
 				return;
 			}
-			this.rowIdx++;
 		}
 	}
 
