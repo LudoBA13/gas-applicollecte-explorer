@@ -1,7 +1,7 @@
 function importAppliCollectePlanning(base64Data, fileName)
 {
 	importAppliCollecte(base64Data, fileName, [
-		{ sourceName: 'Inscriptions', targetName: 'AppliCollecte-Inscription' },
+		{ sourceName: 'Inscriptions', targetName: 'AppliCollecte-Inscriptions' },
 		{ sourceName: 'Récapitulatif', targetName: 'AppliCollecte-Récapitulatif' }
 	]);
 }
@@ -23,26 +23,50 @@ function importAppliCollecte(base64Data, fileName, sheetsToImport)
 		sheetsToImport.forEach(item => 
 		{
 			const sourceSheet = tempSpreadsheet.getSheetByName(item.sourceName);
-			if (sourceSheet)
+			if (!sourceSheet)
 			{
-				const existingSheet = targetSpreadsheet.getSheetByName(item.targetName);
-				if (existingSheet)
-				{
-					existingSheet.clear();
-					sourceSheet.getDataRange().copyTo(existingSheet.getRange(1, 1));
-					existingSheet.autoResizeColumns(1, existingSheet.getLastColumn());
-				}
-				else
-				{
-					const newSheet = sourceSheet.copyTo(targetSpreadsheet);
-					newSheet.setName(item.targetName);
-					newSheet.autoResizeColumns(1, newSheet.getLastColumn());
-				}
+				return;
 			}
+			
+			let targetSheet = targetSpreadsheet.getSheetByName(item.targetName);
+			if (!targetSheet)
+			{
+				targetSheet = targetSpreadsheet.insertSheet(item.targetName);
+			}
+			
+			targetSheet.clear();
+			const sourceRange = sourceSheet.getDataRange();
+			const values = sourceRange.getValues();
+			targetSheet.getRange(1, 1, values.length, values[0].length).setValues(values);
+			resizeSheetToData(targetSheet, values.length, values[0].length);
 		});
 	}
 	finally
 	{
 		DriveApp.getFileById(tempSpreadsheet.getId()).setTrashed(true);
+	}
+}
+
+function resizeSheetToData(sheet, rows, cols)
+{
+	const maxRows = sheet.getMaxRows();
+	const maxCols = sheet.getMaxColumns();
+
+	if (maxRows > rows)
+	{
+		sheet.deleteRows(rows + 1, maxRows - rows);
+	}
+	else if (maxRows < rows)
+	{
+		sheet.insertRowsAfter(maxRows, rows - maxRows);
+	}
+
+	if (maxCols > cols)
+	{
+		sheet.deleteColumns(cols + 1, maxCols - cols);
+	}
+	else if (maxCols < cols)
+	{
+		sheet.insertColumnsAfter(maxCols, cols - maxCols);
 	}
 }
