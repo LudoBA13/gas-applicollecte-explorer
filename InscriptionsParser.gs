@@ -42,9 +42,15 @@ class InscriptionsParser
 		const cellB = rawCellB ? rawCellB.toString().trim() : '';
 		const cellC = row[1] ? row[1].toString().trim() : '';
 
-		if (cellB === '' || cellB === 'Nom du bénévole ou du responsable')
+		if (cellB === '')
 		{
 			this.state.currentSlot = null;
+			return;
+		}
+
+		if (cellB === 'Nom du bénévole ou du responsable')
+		{
+			// Ignore header
 			return;
 		}
 
