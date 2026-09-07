@@ -121,35 +121,6 @@ class InscriptionsParser
 			slots: [],
 			volunteers: []
 		};
-		
-		// Parse time slots from Column E onwards (index 3, since we offset 1 initially)
-		// Row is the data row, Column A is index 0 in the sheet.
-		// offset(0, 1, ...) means Row[0] is Column B.
-		// Column E is index 3 in the row array (B=0, C=1, D=2, E=3).
-		for (let i = 3; i < row.length; i++)
-		{
-			const timeSlotStr = row[i] ? row[i].toString().trim() : '';
-			if (timeSlotStr === '')
-			{
-				break;
-			}
-			
-			const match = timeSlotStr.match(/(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/);
-			if (match)
-			{
-				const start = match[1].split(':');
-				const end = match[2].split(':');
-				const startTime = parseInt(start[0]) * 60 + parseInt(start[1]);
-				const endTime = parseInt(end[0]) * 60 + parseInt(end[1]);
-				const durationHours = (endTime - startTime) / 60;
-				
-				slot.slots.push({
-					time: timeSlotStr,
-					duration: durationHours
-				});
-			}
-		}
-		
 		this.rowIdx++;
 
 		// Next line: "Responsable PC dédié :"
@@ -165,16 +136,58 @@ class InscriptionsParser
 			}
 		}
 
+		// Next line: Time slots
+		let timeSlotRow = null;
+		if (this.rowIdx < this.data.length)
+		{
+			timeSlotRow = this.data[this.rowIdx];
+			this.rowIdx++;
+		}
+		
 		// Next line: "Nom du bénévole ou du responsable", ignore
 		if (this.rowIdx < this.data.length)
 		{
 			this.rowIdx++;
 		}
 		
+		// Parse time slots using the row before the header
+		if (timeSlotRow)
+		{
+			this.parseTimeSlots(slot, timeSlotRow);
+		}
+		
 		// Then volunteers
 		this.parseVolunteers(slot);
 		
 		cp.slots.push(slot);
+	}
+
+	parseTimeSlots(slot, row)
+	{
+		// Column E is index 3 in row.
+		for (let i = 3; i < row.length; i++)
+		{
+			const timeSlotStr = row[i] ? row[i].toString().trim() : '';
+			if (timeSlotStr === '')
+			{
+				break;
+			}
+			
+			const match = timeSlotStr.match(/(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/);
+			if (match)
+			{
+				const start = match[1].split(':');
+				const end = match[2].split(':');
+				const startTime = parseInt(start[0], 10) * 60 + parseInt(start[1], 10);
+				const endTime = parseInt(end[0], 10) * 60 + parseInt(end[1], 10);
+				const durationHours = (endTime - startTime) / 60;
+				
+				slot.slots.push({
+					time: timeSlotStr,
+					duration: durationHours
+				});
+			}
+		}
 	}
 
 	parseVolunteers(slot)
