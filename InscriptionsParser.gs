@@ -213,7 +213,7 @@ class InscriptionsParser
 			for (let i = 0; i < slot.slots.length; i++)
 			{
 				const allocationCell = volRow[3 + i];
-				const allocation = parseFloat(allocationCell) || 0;
+				const allocation = parseInt(allocationCell, 10) || 0;
 				if (allocation > 0)
 				{
 					totalDuration += allocation * slot.slots[i].duration;
