@@ -1,3 +1,10 @@
+function _testExport()
+{
+	const parser = new InscriptionsParser('AppliCollecte-Inscriptions');
+	const data = parser.parse();
+	exportInscriptionsToDataSheet(data);
+}
+
 function exportInscriptionsToDataSheet(parsedData)
 {
 	const targetSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
