@@ -123,30 +123,34 @@ class InscriptionsParser
 		};
 		this.rowIdx++;
 
-		// Next line: "Responsable PC dédié :"
-		if (this.rowIdx < this.data.length)
+		// Next line(s): "Responsable PC dédié :" and potentially others until header
+		let timeSlotRow = null;
+		while (this.rowIdx < this.data.length)
 		{
-			const nextRow = this.data[this.rowIdx];
-			const cellB = nextRow[0] ? nextRow[0].toString().trim() : '';
-			const cellC = nextRow[1] ? nextRow[1].toString().trim() : '';
+			const currentRow = this.data[this.rowIdx];
+			const cellB = currentRow[0] ? currentRow[0].toString().trim() : '';
+			const cellC = currentRow[1] ? currentRow[1].toString().trim() : '';
+
 			if (this.isResponsablePCDedie(cellB))
 			{
 				slot.responsablePCDedie = cellC;
 				this.rowIdx++;
+				continue;
 			}
-		}
-
-		// Next line: Time slots
-		let timeSlotRow = null;
-		if (this.rowIdx < this.data.length)
-		{
-			timeSlotRow = this.data[this.rowIdx];
-			this.rowIdx++;
-		}
-		
-		// Next line: "Nom du bénévole ou du responsable", ignore
-		if (this.rowIdx < this.data.length)
-		{
+			
+			if (cellB === 'Nom du bénévole ou du responsable')
+			{
+				// Found header, timeSlotRow is the one above it
+				this.rowIdx++; // Consume header
+				break;
+			}
+			
+			// If not blank, this is a candidate for the time slot row
+			if (cellB !== '')
+			{
+				timeSlotRow = currentRow;
+			}
+			
 			this.rowIdx++;
 		}
 		
