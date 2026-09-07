@@ -207,19 +207,25 @@ class InscriptionsParser
 			}
 			
 			let totalDuration = 0;
+			let slotCount = 0;
 			// Column E is index 3 in volRow.
 			// Map allocations to time slots (which start at index 3 of the data row).
 			for (let i = 0; i < slot.slots.length; i++)
 			{
 				const allocationCell = volRow[3 + i];
 				const allocation = parseFloat(allocationCell) || 0;
-				totalDuration += allocation * slot.slots[i].duration;
+				if (allocation > 0)
+				{
+					totalDuration += allocation * slot.slots[i].duration;
+					slotCount++;
+				}
 			}
 			
 			slot.volunteers.push({
 				name: volName,
 				organization: volOrg,
-				totalDuration: totalDuration
+				totalDuration: totalDuration,
+				slotCount: slotCount
 			});
 			this.rowIdx++;
 		}
