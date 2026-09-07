@@ -74,8 +74,7 @@ class InscriptionsParser
 					this.rowIdx++;
 				}
 				
-				// Next is a blank line (might be handled by blank line loop), 
-				// then Date slots
+				// Next is a blank line, then Date slots
 				break;
 			}
 			else
@@ -206,7 +205,7 @@ class InscriptionsParser
 				this.rowIdx++;
 				return;
 			}
-
+			
 			let totalDuration = 0;
 			// Column E is index 3 in volRow.
 			// Map allocations to time slots (which start at index 3 of the data row).
@@ -216,7 +215,7 @@ class InscriptionsParser
 				const allocation = parseFloat(allocationCell) || 0;
 				totalDuration += allocation * slot.slots[i].duration;
 			}
-
+			
 			slot.volunteers.push({
 				name: volName,
 				organization: volOrg,
