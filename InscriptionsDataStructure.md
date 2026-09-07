@@ -11,6 +11,9 @@ This document defines the custom, display-oriented structure of the "Inscription
 
 ## Date Slot Section
 - **Date**: The first value in Column B (identified as a Date object or "dd/mm/yyyy" format).
+- **Time Slots**: Iterating from Column E (index 3 in data row) rightward until an empty cell.
+  - **Format**: "HH:mm - HH:mm"
+  - **Logic**: Calculate duration in hours based on the time interval.
 - **Responsable PC dédié**: Line starting with "Responsable PC dédié : " (Column B), followed by optional names (Column C).
 - **Header**: Line starting with "Nom du bénévole ou du responsable" (Column B). **To be ignored.**
 - **Volunteer List**:
