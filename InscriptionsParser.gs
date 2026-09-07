@@ -123,8 +123,7 @@ class InscriptionsParser
 		};
 		this.rowIdx++;
 
-		let lastNonEmptyRow = null;
-		
+		// Next line(s): "Responsable PC dédié :" and potentially others until header
 		while (this.rowIdx < this.data.length)
 		{
 			const currentRow = this.data[this.rowIdx];
@@ -140,19 +139,13 @@ class InscriptionsParser
 			
 			if (cellB === 'Nom du bénévole ou du responsable')
 			{
-				// Found header, use the lastNonEmptyRow for time slots
-				if (lastNonEmptyRow)
+				// Found header, use the previous row for time slots
+				if (this.rowIdx > 0)
 				{
-					this.parseTimeSlots(slot, lastNonEmptyRow);
+					this.parseTimeSlots(slot, this.data[this.rowIdx - 1]);
 				}
 				this.rowIdx++; // Consume header
 				break;
-			}
-			
-			// If not blank, keep track of this row as potential time slot row
-			if (cellB !== '')
-			{
-				lastNonEmptyRow = currentRow;
 			}
 			
 			this.rowIdx++;
@@ -196,6 +189,11 @@ class InscriptionsParser
 
 	parseVolunteers(slot)
 	{
+		if (slot.slots.length === 0)
+		{
+			throw new Error('Unexpected: Volunteer found but no time slots set.');
+		}
+
 		while (this.rowIdx < this.data.length)
 		{
 			const volRow = this.data[this.rowIdx];
