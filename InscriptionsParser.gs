@@ -217,7 +217,7 @@ class InscriptionsParser
 				if (allocation > 0)
 				{
 					totalDuration += allocation * slot.slots[i].duration;
-					slotCount++;
+					slotCount += allocation;
 				}
 			}
 			
