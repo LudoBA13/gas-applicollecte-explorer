@@ -187,12 +187,26 @@ class InscriptionsParser
 
 			if (volName === '')
 			{
-				// Empty line ends volunteer list and section
+				// Empty line ends volunteer list
 				this.rowIdx++;
 				return;
 			}
 
-			slot.volunteers.push({ name: volName, organization: volOrg });
+			let totalDuration = 0;
+			// Column E is index 3 in volRow.
+			// Map allocations to time slots (which start at index 3 of the data row).
+			for (let i = 0; i < slot.slots.length; i++)
+			{
+				const allocationCell = volRow[3 + i];
+				const allocation = parseFloat(allocationCell) || 0;
+				totalDuration += allocation * slot.slots[i].duration;
+			}
+
+			slot.volunteers.push({
+				name: volName,
+				organization: volOrg,
+				totalDuration: totalDuration
+			});
 			this.rowIdx++;
 		}
 	}
