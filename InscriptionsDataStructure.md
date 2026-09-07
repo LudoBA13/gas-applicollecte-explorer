@@ -20,6 +20,8 @@ This document defines the custom, display-oriented structure of the "Inscription
   - One or more lines following the header.
   - Column B: Volunteer name.
   - Column C: Organization name.
+  - **Allocations**: Columns E onwards represent allocations for each time slot defined in the Date Slot section.
+    - **Logic**: For each volunteer, multiply the numerical allocation in the slot column by the duration of that time slot and sum the results to store as `totalDuration` for the volunteer.
   - **Termination**: List ends when an empty value is encountered in Column B.
 - **Looping**:
   - A blank line ends the volunteer list, returning control to parse the next Date Slot.
