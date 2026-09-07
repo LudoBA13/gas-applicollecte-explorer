@@ -170,23 +170,25 @@ class InscriptionsParser
 			const timeSlotStr = row[i] ? row[i].toString().trim() : '';
 			if (timeSlotStr === '')
 			{
-				break;
+				continue;
 			}
 			
 			const match = timeSlotStr.match(/(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/);
-			if (match)
+			if (!match)
 			{
-				const start = match[1].split(':');
-				const end = match[2].split(':');
-				const startTime = parseInt(start[0], 10) * 60 + parseInt(start[1], 10);
-				const endTime = parseInt(end[0], 10) * 60 + parseInt(end[1], 10);
-				const durationHours = (endTime - startTime) / 60;
-				
-				slot.slots.push({
-					time: timeSlotStr,
-					duration: durationHours
-				});
+				continue;
 			}
+			
+			const start = match[1].split(':');
+			const end = match[2].split(':');
+			const startTime = parseInt(start[0], 10) * 60 + parseInt(start[1], 10);
+			const endTime = parseInt(end[0], 10) * 60 + parseInt(end[1], 10);
+			const durationHours = (endTime - startTime) / 60;
+			
+			slot.slots.push({
+				time: timeSlotStr,
+				duration: durationHours
+			});
 		}
 	}
 
