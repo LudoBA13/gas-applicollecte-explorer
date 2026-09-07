@@ -47,7 +47,6 @@ class InscriptionsParser
 			name: this.data[this.rowIdx][0].toString().trim(),
 			address: '',
 			responsablesSecteur: '',
-			responsablesPC: '',
 			slots: []
 		};
 		this.rowIdx++;
@@ -64,84 +63,88 @@ class InscriptionsParser
 				continue;
 			}
 
-			if (this.isDateSlot(row[0], cellB))
-			{
-				// Hand off to date slot parser
-				this.parseDateSlotSection(cp);
-			}
-			else if (this.isResponsableSecteur(cellB))
+			if (this.isResponsableSecteur(cellB))
 			{
 				cp.responsablesSecteur = cellC;
 				this.rowIdx++;
-			}
-			else if (this.isResponsablePC(cellB))
-			{
-				cp.responsablesPC = cellC;
-				this.rowIdx++;
-			}
-			else if (cp.responsablesSecteur === '' && cp.responsablesPC === '')
-			{
-				// Assume address
-				cp.address += (cp.address ? ', ' : '') + cellB;
-				this.rowIdx++;
+				
+				// Next line is "Responsable(s) PC:", ignore it
+				if (this.rowIdx < this.data.length)
+				{
+					this.rowIdx++;
+				}
+				
+				// Next is a blank line (might be handled by blank line loop), 
+				// then Date slots
+				break;
 			}
 			else
 			{
-				// It's not a part of this CP (likely a new one)
+				// Part of the address
+				cp.address += (cp.address ? ', ' : '') + cellB;
+				this.rowIdx++;
+			}
+		}
+
+		// Parse Date slots
+		while (this.rowIdx < this.data.length)
+		{
+			const row = this.data[this.rowIdx];
+			const cellB = row[0] ? row[0].toString().trim() : '';
+			
+			if (cellB === '')
+			{
+				this.rowIdx++;
+				continue;
+			}
+
+			if (this.isDateSlot(row[0], cellB))
+			{
+				this.parseDateSlotSection(cp);
+			}
+			else
+			{
+				// End of this collection point
 				break;
 			}
 		}
+		
 		return cp;
 	}
 
 	parseDateSlotSection(cp)
 	{
-		while (this.rowIdx < this.data.length)
+		const row = this.data[this.rowIdx];
+		const slot = {
+			date: (row[0] instanceof Date) ? Utilities.formatDate(row[0], Session.getScriptTimeZone(), 'dd/MM/yyyy') : row[0].toString().trim(),
+			responsablePCDedie: '',
+			volunteers: []
+		};
+		this.rowIdx++;
+
+		// Next line: "Responsable PC dédié :"
+		if (this.rowIdx < this.data.length)
 		{
-			const row = this.data[this.rowIdx];
-			const cellB = row[0] ? row[0].toString().trim() : '';
-			const cellC = row[1] ? row[1].toString().trim() : '';
-
-			if (cellB === '')
+			const nextRow = this.data[this.rowIdx];
+			const cellB = nextRow[0] ? nextRow[0].toString().trim() : '';
+			const cellC = nextRow[1] ? nextRow[1].toString().trim() : '';
+			if (this.isResponsablePCDedie(cellB))
 			{
-				// Empty line ends the date slot section
+				slot.responsablePCDedie = cellC;
 				this.rowIdx++;
-				return;
-			}
-
-			if (this.isDateSlot(row[0], cellB))
-			{
-				const slot = {
-					date: (row[0] instanceof Date) ? Utilities.formatDate(row[0], Session.getScriptTimeZone(), 'dd/MM/yyyy') : cellB,
-					responsablePCDedie: '',
-					volunteers: []
-				};
-				cp.slots.push(slot);
-				this.rowIdx++;
-			}
-			else if (this.isResponsablePCDedie(cellB))
-			{
-				if (cp.slots.length > 0)
-				{
-					cp.slots[cp.slots.length - 1].responsablePCDedie = cellC;
-				}
-				this.rowIdx++;
-			}
-			else if (cellB === 'Nom du bénévole ou du responsable')
-			{
-				this.rowIdx++;
-				if (cp.slots.length > 0)
-				{
-					this.parseVolunteers(cp.slots[cp.slots.length - 1]);
-				}
-			}
-			else
-			{
-				// If we hit something else (not a date, not a field of the slot, not a volunteer),
-				// it's likely the start of the next Collection Point.
-				return;
 			}
 		}
+
+		// Next line: "Nom du bénévole ou du responsable", ignore
+		if (this.rowIdx < this.data.length)
+		{
+			this.rowIdx++;
+		}
+		
+		// Then volunteers
+		this.parseVolunteers(slot);
+		
+		cp.slots.push(slot);
 	}
 
 	parseVolunteers(slot)
