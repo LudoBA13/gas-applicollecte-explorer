@@ -164,7 +164,7 @@ class InscriptionsParser
 		const row = this.data[this.rowIdx];
 		const slot = {
 			date: (row[0] instanceof Date) ? Utilities.formatDate(row[0], Session.getScriptTimeZone(), 'dd/MM/yyyy') : row[0].toString().trim(),
-			dedicatedCPManager: '',
+			dedicatedCPManager: [],
 			slots: [],
 			volunteers: []
 		};
@@ -179,7 +179,7 @@ class InscriptionsParser
 
 			if (this.isDedicatedCPManager(cellB))
 			{
-				slot.dedicatedCPManager = cellC;
+				slot.dedicatedCPManager = cellC ? cellC.split(',').map(name => ({ name: name.trim() })).filter(mgr => mgr.name !== '') : [];
 				this.rowIdx++;
 				continue;
 			}
