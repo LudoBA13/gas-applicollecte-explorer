@@ -126,15 +126,7 @@ function exportInscriptionsToDataSheet(parsedData)
 		dataSheet.clear();
 		dataSheet.getRange(1, 1, rows.length, headers.length).setValues(rows);
 
-		// Handle DataTable named range
-		const namedRanges = targetSpreadsheet.getNamedRanges();
-		namedRanges.forEach(range =>
-		{
-			if (range.getName() === 'DataTable')
-			{
-				range.remove();
-			}
-		});
-		targetSpreadsheet.setNamedRange('DataTable', dataSheet.getRange(1, 1, rows.length, headers.length));
+		// Handle DataTable
+		ensureDataTable();
 	}
 }
