@@ -94,7 +94,7 @@ class InscriptionsParser
 		const cp = {
 			name: this.data[this.rowIdx][0].toString().trim(),
 			address: '',
-			sectorManager: '',
+			sectorManager: [],
 			slots: []
 		};
 		this.rowIdx++;
@@ -113,7 +113,7 @@ class InscriptionsParser
 
 			if (this.isSectorManager(cellB))
 			{
-				cp.sectorManager = cellC;
+				cp.sectorManager = cellC ? cellC.split(',').map(name => name.trim()).filter(name => name !== '') : [];
 				this.rowIdx++;
 				
 				// Next line is "Responsable(s) PC:", ignore it
