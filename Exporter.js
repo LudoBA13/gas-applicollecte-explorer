@@ -81,7 +81,7 @@ function resizeSheet(sheet, numRows, numCols)
 	}
 	else if (currentMaxRows < targetRows)
 	{
-		sheet.insertRows(currentMaxRows + 1, targetRows - currentMaxRows);
+		sheet.insertRowsAfter(currentMaxRows, targetRows - currentMaxRows);
 	}
 
 	if (currentMaxCols > targetCols)
@@ -90,7 +90,7 @@ function resizeSheet(sheet, numRows, numCols)
 	}
 	else if (currentMaxCols < targetCols)
 	{
-		sheet.insertColumns(currentMaxCols + 1, targetCols - currentMaxCols);
+		sheet.insertColumnsAfter(currentMaxCols, targetCols - currentMaxCols);
 	}
 }
 
