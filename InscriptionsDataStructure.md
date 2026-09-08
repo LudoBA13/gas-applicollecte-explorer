@@ -5,7 +5,7 @@ This document defines the custom, display-oriented structure of the "Inscription
 ## Collection Point Section
 - **Name**: The first non-empty value in Column B.
 - **Address**: Zero or more subsequent lines in Column B (until "Responsable secteur:").
-- **Responsable secteur**: Line starting with "Responsable secteur: " (Column B), followed by zero or more comma-separated names (Column C).
+- **Sector Managers**: Line starting with "Responsable secteur: " (Column B), followed by zero or more comma-separated names in the same cell. Stored as an array of objects: `[{name: '...'}, ...]`.
 - **Responsable(s) PC**: Line starting with "Responsable(s) PC:" (Column B). **To be ignored.**
 - **Transition**: Followed by a blank line (or multiple) before Date Slot data.
 
@@ -14,7 +14,7 @@ This document defines the custom, display-oriented structure of the "Inscription
 - **Time Slots**: Iterating from Column E (index 3 in data row) rightward until an empty cell.
   - **Format**: "HH:mm - HH:mm"
   - **Logic**: Calculate duration in hours based on the time interval.
-- **Responsable PC dédié**: Line starting with "Responsable PC dédié : " (Column B), followed by optional names (Column C).
+- **Dedicated CP Managers**: Line starting with "Responsable PC dédié : " (Column B), followed by optional comma-separated names in the same cell. Stored as an array of objects: `[{name: '...'}, ...]`.
 - **Header**: Line starting with "Nom du bénévole ou du responsable" (Column B). **To be ignored.**
 - **Volunteer List**:
   - One or more lines following the header.
