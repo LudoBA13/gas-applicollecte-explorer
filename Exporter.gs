@@ -1,3 +1,31 @@
+function addManagersToVolunteers(parsedData)
+{
+	parsedData.forEach(cp =>
+	{
+		cp.slots.forEach(slot =>
+		{
+			// Calculate total duration of all slots for this day
+			const totalDayDuration = slot.slots.reduce((acc, s) => acc + s.duration, 0);
+			const totalSlotCount = slot.slots.length;
+			
+			slot.dedicatedCPManagers.forEach(mgr =>
+			{
+				const isAlreadyVolunteer = slot.volunteers.some(vol => vol.name === mgr.name);
+				
+				if (!isAlreadyVolunteer)
+				{
+					slot.volunteers.push({
+						name: mgr.name,
+						organization: mgr.organization,
+						totalDuration: totalDayDuration,
+						slotCount: totalSlotCount
+					});
+				}
+			});
+		});
+	});
+}
+
 function enrichManagersWithOrganization(parsedData)
 {
 	const orgMap = getVolunteerOrganizationMap();
