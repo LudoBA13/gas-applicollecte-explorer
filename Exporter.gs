@@ -17,7 +17,8 @@ function exportInscriptionsToDataSheet(parsedData)
 	
 	dataSheet.clear();
 	
-	const headers = ['Collection point', 'Date', 'Volunteer', 'Organization', 'Duration', 'Count'];
+	// const headers = ['Collection point', 'Date', 'Volunteer', 'Organization', 'Duration', 'Count'];
+	const headers = ['Point de Collection', 'Date', 'Nom / Groupe', 'Structure', 'Durée (heures)', 'Créneaux'];
 	const rows = [headers];
 	
 	parsedData.forEach(cp =>
