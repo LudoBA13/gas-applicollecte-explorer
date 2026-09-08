@@ -57,7 +57,7 @@ function enrichManagersWithOrganization(parsedData)
 	});
 }
 
-function _testExport()
+function updateDataTable()
 {
 	const parser = new InscriptionsParser('AppliCollecte-Inscriptions');
 	const data = parser.parse();
