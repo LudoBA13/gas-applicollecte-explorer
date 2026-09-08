@@ -50,14 +50,34 @@ function _testParser()
 {
 	const parser = new InscriptionsParser('AppliCollecte-Inscriptions');
 	const data = parser.parse();
-	console.log(JSON.stringify(data, null, 2));
 }
+
+const Section = {
+	ADDRESS_HEADER: 'ADDRESS_HEADER',
+	ADDRESS: 'ADDRESS',
+	SECTOR_MANAGERS: 'SECTOR_MANAGERS',
+	CP_MANAGERS: 'CP_MANAGERS',
+	DATE_SLOT: 'DATE_SLOT',
+	VOLUNTEERS_LIST: 'VOLUNTEERS_LIST',
+	UNKNOWN: 'UNKNOWN'
+};
 
 class InscriptionsParser
 {
 	constructor(sheetName)
 	{
 		this.sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+	}
+
+	_detectSection(cell)
+	{
+		const text = (cell === null || cell === undefined) ? '' : cell.toString().trim();
+		if (text === 'Adresse du Point de Collecte:') return Section.ADDRESS_HEADER;
+		if (this.isSectorManager(text)) return Section.SECTOR_MANAGERS;
+		if (this.isCPManager(text)) return Section.CP_MANAGERS;
+		if (this.isDateSlot(cell)) return Section.DATE_SLOT;
+		if (text === 'Nom du bénévole ou du responsable') return Section.VOLUNTEERS_LIST;
+		return Section.UNKNOWN;
 	}
 
 	parse()
@@ -74,9 +94,10 @@ class InscriptionsParser
 		while (this.rowIdx < this.data.length)
 		{
 			const row = this.data[this.rowIdx];
-			const cellB = row[0] ? row[0].toString().trim() : '';
+			const cell = row[0];
+			const cellText = cell ? cell.toString().trim() : '';
 
-			if (cellB === '')
+			if (cellText === '')
 			{
 				this.rowIdx++;
 				continue;
@@ -105,66 +126,49 @@ class InscriptionsParser
 		while (this.rowIdx < this.data.length)
 		{
 			const row = this.data[this.rowIdx];
-			const cellB = row[0] ? row[0].toString().trim() : '';
-			const cellC = row[1] ? row[1].toString().trim() : '';
+			const cell = row[0];
+			const cellText = cell ? cell.toString().trim() : '';
 
-			if (cellB === '')
+			if (cellText === '')
 			{
 				this.rowIdx++;
 				continue;
 			}
 
-			if (this.isSectorManager(cellB))
-			{
-				cp.sectorManagers = this._parseNamesFromColumnB(cellB);
-				this.rowIdx++;
-				break;
-			}
-			else if (this.isCPManager(cellB))
-			{
-				cp.cpManagers = this._parseNamesFromColumnB(cellB);
-				this.rowIdx++;
-				break;
-			}
-			else
-			{
-				// Part of the address
-				cp.address += (cp.address ? ', ' : '') + cellB;
-				this.rowIdx++;
-			}
-		}
-
-		// Parse Date slots
-		while (this.rowIdx < this.data.length)
-		{
-			const row = this.data[this.rowIdx];
-			const cellB = row[0] ? row[0].toString().trim() : '';
+			const section = this._detectSection(row[0]);
 			
-			if (cellB === '')
+			switch (section)
 			{
-				this.rowIdx++;
-				continue;
-			}
-
-			if (this.isDateSlot(row[0], cellB))
-			{
-				this.parseDateSlotSection(cp);
-			}
-			else
-			{
-				// End of this collection point
-				break;
+				case Section.ADDRESS_HEADER:
+					this.rowIdx++;
+					this._parseAddress(cp);
+					break;
+				case Section.SECTOR_MANAGERS:
+					cp.sectorManagers = this._parseNamesFromColumnB(cellText);
+					this.rowIdx++;
+					break;
+				case Section.CP_MANAGERS:
+					cp.cpManagers = this._parseNamesFromColumnB(cellText);
+					this.rowIdx++;
+					break;
+				case Section.DATE_SLOT:
+					this._parseDateSlot(cp);
+					break;
+				default:
+					// Unknown state, break collection point parsing
+					return cp;
 			}
 		}
-		
+
 		return cp;
 	}
 
-	parseDateSlotSection(cp)
+	_parseDateSlot(cp)
 	{
 		const row = this.data[this.rowIdx];
+		const cell = row[0];
 		const slot = {
-			date: (row[0] instanceof Date) ? Utilities.formatDate(row[0], Session.getScriptTimeZone(), 'dd/MM/yyyy') : row[0].toString().trim(),
+			date: (cell instanceof Date) ? Utilities.formatDate(cell, Session.getScriptTimeZone(), 'dd/MM/yyyy') : cell.toString().trim(),
 			dedicatedCPManagers: [],
 			slots: [],
 			volunteers: []
@@ -175,17 +179,17 @@ class InscriptionsParser
 		while (this.rowIdx < this.data.length)
 		{
 			const currentRow = this.data[this.rowIdx];
-			const cellB = currentRow[0] ? currentRow[0].toString().trim() : '';
-			const cellC = currentRow[1] ? currentRow[1].toString().trim() : '';
+			const cell = currentRow[0];
+			const cellText = cell ? cell.toString().trim() : '';
 
-			if (this.isDedicatedCPManager(cellB))
+			if (this.isDedicatedCPManager(cellText))
 			{
-				slot.dedicatedCPManagers = this._parseNamesFromColumnB(cellB);
+				slot.dedicatedCPManagers = this._parseNamesFromColumnB(cellText);
 				this.rowIdx++;
 				continue;
 			}
 			
-			if (cellB === 'Nom du bénévole ou du responsable')
+			if (cellText === 'Nom du bénévole ou du responsable')
 			{
 				// Found header, use the previous row for time slots
 				if (this.rowIdx > 0)
@@ -280,9 +284,31 @@ class InscriptionsParser
 		}
 	}
 
-	_parseNamesFromColumnB(cellB)
+	_parseAddress(cp)
 	{
-		const namesStr = cellB.split(':')[1] || '';
+		let addressParts = [];
+		while (this.rowIdx < this.data.length)
+		{
+			const nextRow = this.data[this.rowIdx];
+			const nextCell = nextRow[0];
+			const nextCellText = nextCell ? nextCell.toString().trim() : '';
+			
+			if (this._detectSection(nextRow[0]) === Section.UNKNOWN && nextCellText !== '')
+			{
+				addressParts.push(nextCellText);
+				this.rowIdx++;
+			}
+			else
+			{
+				break;
+			}
+		}
+		cp.address = addressParts.join(', ');
+	}
+
+	_parseNamesFromColumnB(cellText)
+	{
+		const namesStr = cellText.split(':')[1] || '';
 		return namesStr ? namesStr.split(',').map(name => ({ name: name.trim() })).filter(mgr => mgr.name !== '') : [];
 	}
 
@@ -290,5 +316,5 @@ class InscriptionsParser
 	isSectorManager(text) { return /^Responsable\s+secteur\s*:/i.test(text); }
 	isCPManager(text) { return /^Responsable\(s\)\s+PC\s*:/i.test(text); }
 	isDedicatedCPManager(text) { return /^Responsable\s+PC\s+dédié\s*:/i.test(text); }
-	isDateSlot(value, text) { return (value instanceof Date) || /^\d{2}\/\d{2}\/\d{4}$/.test(text); }
+	isDateSlot(value) { return value instanceof Date; }
 }
