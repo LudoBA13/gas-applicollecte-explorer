@@ -53,10 +53,8 @@ function _testExport()
 {
 	const parser = new InscriptionsParser('AppliCollecte-Inscriptions');
 	const data = parser.parse();
-	
 	enrichManagersWithOrganization(data);
 	addManagersToVolunteers(data);
-	
 	exportInscriptionsToDataSheet(data);
 }
 
