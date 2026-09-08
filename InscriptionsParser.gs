@@ -113,7 +113,8 @@ class InscriptionsParser
 
 			if (this.isSectorManager(cellB))
 			{
-				cp.sectorManagers = cellC ? cellC.split(',').map(name => ({ name: name.trim() })).filter(mgr => mgr.name !== '') : [];
+				const namesStr = cellB.split(':')[1] || '';
+				cp.sectorManagers = namesStr ? namesStr.split(',').map(name => ({ name: name.trim() })).filter(mgr => mgr.name !== '') : [];
 				this.rowIdx++;
 				
 				// Next line is "Responsable(s) PC:", ignore it
@@ -179,7 +180,8 @@ class InscriptionsParser
 
 			if (this.isDedicatedCPManager(cellB))
 			{
-				slot.dedicatedCPManagers = cellC ? cellC.split(',').map(name => ({ name: name.trim() })).filter(mgr => mgr.name !== '') : [];
+				const namesStr = cellB.split(':')[1] || '';
+				slot.dedicatedCPManagers = namesStr ? namesStr.split(',').map(name => ({ name: name.trim() })).filter(mgr => mgr.name !== '') : [];
 				this.rowIdx++;
 				continue;
 			}
