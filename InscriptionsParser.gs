@@ -94,7 +94,7 @@ class InscriptionsParser
 		const cp = {
 			name: this.data[this.rowIdx][0].toString().trim(),
 			address: '',
-			responsablesSecteur: '',
+			sectorManager: '',
 			slots: []
 		};
 		this.rowIdx++;
@@ -111,9 +111,9 @@ class InscriptionsParser
 				continue;
 			}
 
-			if (this.isResponsableSecteur(cellB))
+			if (this.isSectorManager(cellB))
 			{
-				cp.responsablesSecteur = cellC;
+				cp.sectorManager = cellC;
 				this.rowIdx++;
 				
 				// Next line is "Responsable(s) PC:", ignore it
@@ -164,7 +164,7 @@ class InscriptionsParser
 		const row = this.data[this.rowIdx];
 		const slot = {
 			date: (row[0] instanceof Date) ? Utilities.formatDate(row[0], Session.getScriptTimeZone(), 'dd/MM/yyyy') : row[0].toString().trim(),
-			responsablePCDedie: '',
+			dedicatedCPManager: '',
 			slots: [],
 			volunteers: []
 		};
@@ -177,9 +177,9 @@ class InscriptionsParser
 			const cellB = currentRow[0] ? currentRow[0].toString().trim() : '';
 			const cellC = currentRow[1] ? currentRow[1].toString().trim() : '';
 
-			if (this.isResponsablePCDedie(cellB))
+			if (this.isDedicatedCPManager(cellB))
 			{
-				slot.responsablePCDedie = cellC;
+				slot.dedicatedCPManager = cellC;
 				this.rowIdx++;
 				continue;
 			}
@@ -280,8 +280,8 @@ class InscriptionsParser
 	}
 
 	// Helpers
-	isResponsableSecteur(text) { return /^Responsable\s+secteur\s*:/i.test(text); }
-	isResponsablePC(text) { return /^Responsable\(s\)\s+PC\s*:/i.test(text); }
-	isResponsablePCDedie(text) { return /^Responsable\s+PC\s+dédié\s*:/i.test(text); }
+	isSectorManager(text) { return /^Responsable\s+secteur\s*:/i.test(text); }
+	isCPManager(text) { return /^Responsable\(s\)\s+PC\s*:/i.test(text); }
+	isDedicatedCPManager(text) { return /^Responsable\s+PC\s+dédié\s*:/i.test(text); }
 	isDateSlot(value, text) { return (value instanceof Date) || /^\d{2}\/\d{2}\/\d{4}$/.test(text); }
 }
