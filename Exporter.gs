@@ -1,3 +1,26 @@
+function enrichManagersWithOrganization(parsedData)
+{
+	const orgMap = getVolunteerOrganizationMap();
+	
+	parsedData.forEach(cp =>
+	{
+		// Enrich Sector Managers
+		cp.sectorManager.forEach(mgr =>
+		{
+			mgr.organization = orgMap[mgr.name] || '';
+		});
+		
+		// Enrich Date Slot Managers
+		cp.slots.forEach(slot =>
+		{
+			slot.dedicatedCPManagers.forEach(mgr =>
+			{
+				mgr.organization = orgMap[mgr.name] || '';
+			});
+		});
+	});
+}
+
 function _testExport()
 {
 	const parser = new InscriptionsParser('AppliCollecte-Inscriptions');
