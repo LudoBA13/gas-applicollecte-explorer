@@ -113,7 +113,7 @@ class InscriptionsParser
 
 			if (this.isSectorManager(cellB))
 			{
-				cp.sectorManager = cellC ? cellC.split(',').map(name => name.trim()).filter(name => name !== '') : [];
+				cp.sectorManager = cellC ? cellC.split(',').map(name => ({ name: name.trim() })).filter(mgr => mgr.name !== '') : [];
 				this.rowIdx++;
 				
 				// Next line is "Responsable(s) PC:", ignore it
