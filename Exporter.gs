@@ -60,6 +60,34 @@ function _testExport()
 	exportInscriptionsToDataSheet(data);
 }
 
+function resizeSheet(sheet, numRows, numCols)
+{
+	const currentMaxRows = sheet.getMaxRows();
+	const currentMaxCols = sheet.getMaxColumns();
+
+	// Ensure at least 1 row/col
+	const targetRows = Math.max(1, numRows);
+	const targetCols = Math.max(1, numCols);
+
+	if (currentMaxRows > targetRows)
+	{
+		sheet.deleteRows(targetRows + 1, currentMaxRows - targetRows);
+	}
+	else if (currentMaxRows < targetRows)
+	{
+		sheet.insertRows(currentMaxRows + 1, targetRows - currentMaxRows);
+	}
+
+	if (currentMaxCols > targetCols)
+	{
+		sheet.deleteColumns(targetCols + 1, currentMaxCols - targetCols);
+	}
+	else if (currentMaxCols < targetCols)
+	{
+		sheet.insertColumns(currentMaxCols + 1, targetCols - currentMaxCols);
+	}
+}
+
 function exportInscriptionsToDataSheet(parsedData)
 {
 	const targetSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
@@ -69,8 +97,6 @@ function exportInscriptionsToDataSheet(parsedData)
 	{
 		dataSheet = targetSpreadsheet.insertSheet('Data');
 	}
-	
-	dataSheet.clear();
 	
 	// const headers = ['Collection point', 'Date', 'Volunteer', 'Organization', 'Duration', 'Count'];
 	const headers = ['Point de Collection', 'Date', 'Nom / Groupe', 'Structure', 'Durée (heures)', 'Créneaux'];
@@ -94,8 +120,10 @@ function exportInscriptionsToDataSheet(parsedData)
 		});
 	});
 	
-	if (rows.length > 1)
+	if (rows.length > 0)
 	{
+		resizeSheet(dataSheet, rows.length, headers.length);
+		dataSheet.clear();
 		dataSheet.getRange(1, 1, rows.length, headers.length).setValues(rows);
 	}
 }
