@@ -1,3 +1,51 @@
+function getVolunteerOrganizationMap()
+{
+	const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('AppliCollecte-Utilisateurs');
+
+	if (!sheet)
+	{
+		return {};
+	}
+
+	const data = sheet.getDataRange().getValues();
+	let headerRowIdx = -1;
+
+	for (let i = 0; i < data.length; i++)
+	{
+		if (data[i][0] === 'Nom du bénévole')
+		{
+			headerRowIdx = i;
+			break;
+		}
+	}
+
+	if (headerRowIdx === -1)
+	{
+		return {};
+	}
+
+	const headers = data[headerRowIdx];
+	const nameIdx = headers.indexOf('Nom du bénévole');
+	const firstNameIdx = headers.indexOf('Prénom du bénévole');
+	const structureIdx = headers.indexOf('Structure');
+
+	const map = {};
+
+	for (let i = headerRowIdx + 1; i < data.length; i++)
+	{
+		const row = data[i];
+		const lastName = row[nameIdx] || '';
+		const firstName = row[firstNameIdx] || '';
+		const structure = row[structureIdx] || '';
+
+		const fullName = (lastName + ' ' + firstName).trim();
+
+		map[fullName] = structure;
+	}
+
+	return map;
+}
+
 function _testParser()
 {
 	const parser = new InscriptionsParser('AppliCollecte-Inscriptions');
