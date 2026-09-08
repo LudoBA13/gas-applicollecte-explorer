@@ -118,23 +118,19 @@ class InscriptionsParser
 			{
 				cp.sectorManagers = this._parseNamesFromColumnB(cellB);
 				this.rowIdx++;
+				break;
 			}
 			else if (this.isCPManager(cellB))
 			{
 				cp.cpManagers = this._parseNamesFromColumnB(cellB);
 				this.rowIdx++;
+				break;
 			}
 			else
 			{
 				// Part of the address
 				cp.address += (cp.address ? ', ' : '') + cellB;
 				this.rowIdx++;
-			}
-			
-			// If we just parsed a manager line, the next is likely a blank line, so break
-			if (this.isSectorManager(cellB) || this.isCPManager(cellB))
-			{
-				break;
 			}
 		}
 
