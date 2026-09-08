@@ -4,24 +4,44 @@ function addManagersToVolunteers(parsedData)
 	{
 		cp.slots.forEach(slot =>
 		{
-			// Calculate total duration of all slots for this day
-			const totalDayDuration = slot.slots.reduce((acc, s) => acc + s.duration, 0);
-			const totalSlotCount = slot.slots.length;
-			
-			slot.dedicatedCPManagers.forEach(mgr =>
+			if (slot.dedicatedCPManagers.length > 0)
 			{
-				const isAlreadyVolunteer = slot.volunteers.some(vol => vol.name === mgr.name);
+				// Calculate total duration of all slots for this day
+				const totalDayDuration = slot.slots.reduce((acc, s) => acc + s.duration, 0);
+				const totalSlotCount = slot.slots.length;
 				
-				if (!isAlreadyVolunteer)
+				slot.dedicatedCPManagers.forEach(mgr =>
 				{
-					slot.volunteers.push({
-						name: mgr.name,
-						organization: mgr.organization,
-						totalDuration: totalDayDuration,
-						slotCount: totalSlotCount
-					});
-				}
-			});
+					const isAlreadyVolunteer = slot.volunteers.some(vol => vol.name === mgr.name);
+					
+					if (!isAlreadyVolunteer)
+					{
+						slot.volunteers.push({
+							name: mgr.name,
+							organization: mgr.organization,
+							totalDuration: totalDayDuration,
+							slotCount: totalSlotCount
+						});
+					}
+				});
+			}
+			else
+			{
+				cp.sectorManagers.forEach(mgr =>
+				{
+					const isAlreadyVolunteer = slot.volunteers.some(vol => vol.name === mgr.name);
+					
+					if (!isAlreadyVolunteer)
+					{
+						slot.volunteers.push({
+							name: mgr.name,
+							organization: mgr.organization,
+							totalDuration: 0,
+							slotCount: 0
+						});
+					}
+				});
+			}
 		});
 	});
 }
