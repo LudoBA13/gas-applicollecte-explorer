@@ -40,6 +40,12 @@ function enrichManagersWithOrganization(parsedData)
 			mgr.organization = orgMap[mgr.name] || '';
 		});
 		
+		// Enrich CP Managers
+		cp.cpManagers.forEach(mgr =>
+		{
+			mgr.organization = orgMap[mgr.name] || '';
+		});
+		
 		// Enrich Date Slot Managers
 		cp.slots.forEach(slot =>
 		{
