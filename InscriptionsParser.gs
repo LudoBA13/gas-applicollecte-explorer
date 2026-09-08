@@ -99,6 +99,9 @@ class InscriptionsParser
 		};
 		this.rowIdx++;
 
+		// Add CP Managers property
+		cp.cpManagers = [];
+
 		while (this.rowIdx < this.data.length)
 		{
 			const row = this.data[this.rowIdx];
@@ -113,24 +116,25 @@ class InscriptionsParser
 
 			if (this.isSectorManager(cellB))
 			{
-				const namesStr = cellB.split(':')[1] || '';
-				cp.sectorManagers = namesStr ? namesStr.split(',').map(name => ({ name: name.trim() })).filter(mgr => mgr.name !== '') : [];
+				cp.sectorManagers = this._parseNamesFromColumnB(cellB);
 				this.rowIdx++;
-				
-				// Next line is "Responsable(s) PC:", ignore it
-				if (this.rowIdx < this.data.length)
-				{
-					this.rowIdx++;
-				}
-				
-				// Next is a blank line, then Date slots
-				break;
+			}
+			else if (this.isCPManager(cellB))
+			{
+				cp.cpManagers = this._parseNamesFromColumnB(cellB);
+				this.rowIdx++;
 			}
 			else
 			{
 				// Part of the address
 				cp.address += (cp.address ? ', ' : '') + cellB;
 				this.rowIdx++;
+			}
+			
+			// If we just parsed a manager line, the next is likely a blank line, so break
+			if (this.isSectorManager(cellB) || this.isCPManager(cellB))
+			{
+				break;
 			}
 		}
 
@@ -180,8 +184,7 @@ class InscriptionsParser
 
 			if (this.isDedicatedCPManager(cellB))
 			{
-				const namesStr = cellB.split(':')[1] || '';
-				slot.dedicatedCPManagers = namesStr ? namesStr.split(',').map(name => ({ name: name.trim() })).filter(mgr => mgr.name !== '') : [];
+				slot.dedicatedCPManagers = this._parseNamesFromColumnB(cellB);
 				this.rowIdx++;
 				continue;
 			}
@@ -279,6 +282,12 @@ class InscriptionsParser
 			});
 			this.rowIdx++;
 		}
+	}
+
+	_parseNamesFromColumnB(cellB)
+	{
+		const namesStr = cellB.split(':')[1] || '';
+		return namesStr ? namesStr.split(',').map(name => ({ name: name.trim() })).filter(mgr => mgr.name !== '') : [];
 	}
 
 	// Helpers
