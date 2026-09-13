@@ -56,7 +56,7 @@ function ensureDataTable()
 					name: 'DataTable',
 					range: targetRange
 				},
-				updateMask: 'range'
+				fields: 'range'
 			}
 		});
 	} 
