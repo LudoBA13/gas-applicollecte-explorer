@@ -1,3 +1,10 @@
+function _testParser()
+{
+	const parser = new RegistrationsParser('AppliCollecte-Inscriptions');
+	const data = parser.parse();
+	console.log(JSON.stringify(data, null, 2));
+}
+
 function getVolunteerOrganizationMap()
 {
 	const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('AppliCollecte-Utilisateurs');
@@ -44,12 +51,6 @@ function getVolunteerOrganizationMap()
 	}
 
 	return map;
-}
-
-function _testParser()
-{
-	const parser = new RegistrationsParser('AppliCollecte-Inscriptions');
-	const data = parser.parse();
 }
 
 const Section = {
