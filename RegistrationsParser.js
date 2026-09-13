@@ -211,6 +211,8 @@ class RegistrationsParser
 
 	parseTimeSlots(eventDate, row)
 	{
+		const values = this.parseTimeSlotsSummary('Planifié', row.length);
+
 		// Column E is index 3 in row.
 		for (let i = 3; i < row.length; i++)
 		{
@@ -219,24 +221,49 @@ class RegistrationsParser
 			{
 				continue;
 			}
-			
+
 			const match = timeSlotStr.match(/(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/);
 			if (!match)
 			{
 				continue;
 			}
-			
+
 			const start = match[1].split(':');
 			const end = match[2].split(':');
 			const startTime = parseInt(start[0], 10) * 60 + parseInt(start[1], 10);
 			const endTime = parseInt(end[0], 10) * 60 + parseInt(end[1], 10);
 			const durationHours = (endTime - startTime) / 60;
-			
+
 			eventDate.timeSlots.push({
 				time: timeSlotStr,
-				duration: durationHours
+				duration: durationHours,
+				volunteersNeeded: values[eventDate.timeSlots.length] || 0
 			});
 		}
+	}
+
+	parseTimeSlotsSummary(label, colCount)
+	{
+		// Find requirements row. Look ahead until next header or end of volunteer list.
+		let values = [];
+		for (let i = this.rowIdx; i < this.data.length; i++)
+		{
+			const rRow = this.data[i];
+			const rOrg = rRow[1] ? rRow[1].toString().trim() : '';
+			if (rOrg.includes(label))
+			{
+				for (let j = 0; j < colCount - 3; j++)
+				{
+					values.push(parseInt(rRow[3 + j], 10) || 0);
+				}
+				break; // Found it
+			}
+			if (rRow[0] !== '' && rRow[0] !== null)
+			{
+				break; // Hit another section
+			}
+		}
+		return values;
 	}
 
 	parseVolunteers(eventDate)
@@ -258,7 +285,7 @@ class RegistrationsParser
 				this.rowIdx++;
 				return;
 			}
-			
+
 			let totalDuration = 0;
 			let slotCount = 0;
 			// Column E is index 3 in volRow.
@@ -273,7 +300,7 @@ class RegistrationsParser
 					slotCount += allocation;
 				}
 			}
-			
+
 			eventDate.volunteers.push({
 				name: volName,
 				organization: volOrg,
