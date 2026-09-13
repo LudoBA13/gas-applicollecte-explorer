@@ -211,7 +211,8 @@ class RegistrationsParser
 
 	parseTimeSlots(eventDate, row)
 	{
-		const values = this.parseTimeSlotsSummary('Planifié', row.length);
+		const volunteersNeeded = this.parseTimeSlotsSummary('Planifié', row.length);
+		const volunteersProvided = this.parseTimeSlotsSummary('Pourvu', row.length);
 
 		// Column E is index 3 in row.
 		for (let i = 3; i < row.length; i++)
@@ -237,7 +238,8 @@ class RegistrationsParser
 			eventDate.timeSlots.push({
 				time: timeSlotStr,
 				duration: durationHours,
-				volunteersNeeded: values[eventDate.timeSlots.length] || 0
+				volunteersNeeded: volunteersNeeded[eventDate.timeSlots.length] || 0,
+				volunteersProvided: volunteersProvided[eventDate.timeSlots.length] || 0
 			});
 		}
 	}
