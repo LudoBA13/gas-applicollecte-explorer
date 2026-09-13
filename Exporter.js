@@ -2,13 +2,13 @@ function addManagersToVolunteers(parsedData)
 {
 	parsedData.forEach(cp =>
 	{
-		cp.slots.forEach(slot =>
+		cp.eventDates.forEach(slot =>
 		{
 			const managersToProcess = slot.dedicatedCPManagers.length > 0 ? slot.dedicatedCPManagers : cp.cpManagers;
 			const isDedicated = slot.dedicatedCPManagers.length > 0;
 			
-			const totalDayDuration = isDedicated ? slot.slots.reduce((acc, s) => acc + s.duration, 0) : 0;
-			const totalSlotCount = isDedicated ? slot.slots.length : 0;
+			const totalDayDuration = isDedicated ? slot.timeSlots.reduce((acc, s) => acc + s.duration, 0) : 0;
+			const totalSlotCount = isDedicated ? slot.timeSlots.length : 0;
 			
 			managersToProcess.forEach(mgr =>
 			{
@@ -47,7 +47,7 @@ function enrichManagersWithOrganization(parsedData)
 		});
 		
 		// Enrich Date Slot Managers
-		cp.slots.forEach(slot =>
+		cp.eventDates.forEach(slot =>
 		{
 			slot.dedicatedCPManagers.forEach(mgr =>
 			{
@@ -110,7 +110,7 @@ function exportInscriptionsToDataSheet(parsedData)
 	
 	parsedData.forEach(cp =>
 	{
-		cp.slots.forEach(slot =>
+		cp.eventDates.forEach(slot =>
 		{
 			slot.volunteers.forEach(vol =>
 			{

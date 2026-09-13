@@ -116,7 +116,7 @@ class InscriptionsParser
 			name: this.data[this.rowIdx][0].toString().trim(),
 			address: '',
 			areaManagers: [],
-			slots: []
+			eventDates: []
 		};
 		this.rowIdx++;
 
@@ -167,10 +167,10 @@ class InscriptionsParser
 	{
 		const row = this.data[this.rowIdx];
 		const cell = row[0];
-		const slot = {
+		const eventDate = {
 			date: (cell instanceof Date) ? Utilities.formatDate(cell, Session.getScriptTimeZone(), 'dd/MM/yyyy') : cell.toString().trim(),
 			dedicatedCPManagers: [],
-			slots: [],
+			timeSlots: [],
 			volunteers: []
 		};
 		this.rowIdx++;
@@ -184,7 +184,7 @@ class InscriptionsParser
 
 			if (this.isDedicatedCPManager(cellText))
 			{
-				slot.dedicatedCPManagers = this._parseNamesFromColumnB(cellText);
+				eventDate.dedicatedCPManagers = this._parseNamesFromColumnB(cellText);
 				this.rowIdx++;
 				continue;
 			}
@@ -194,7 +194,7 @@ class InscriptionsParser
 				// Found header, use the previous row for time slots
 				if (this.rowIdx > 0)
 				{
-					this.parseTimeSlots(slot, this.data[this.rowIdx - 1]);
+					this.parseTimeSlots(eventDate, this.data[this.rowIdx - 1]);
 				}
 				this.rowIdx++; // Consume header
 				break;
@@ -204,12 +204,12 @@ class InscriptionsParser
 		}
 		
 		// Then volunteers
-		this.parseVolunteers(slot);
+		this.parseVolunteers(eventDate);
 		
-		cp.slots.push(slot);
+		cp.eventDates.push(eventDate);
 	}
 
-	parseTimeSlots(slot, row)
+	parseTimeSlots(eventDate, row)
 	{
 		// Column E is index 3 in row.
 		for (let i = 3; i < row.length; i++)
@@ -232,16 +232,16 @@ class InscriptionsParser
 			const endTime = parseInt(end[0], 10) * 60 + parseInt(end[1], 10);
 			const durationHours = (endTime - startTime) / 60;
 			
-			slot.slots.push({
+			eventDate.timeSlots.push({
 				time: timeSlotStr,
 				duration: durationHours
 			});
 		}
 	}
 
-	parseVolunteers(slot)
+	parseVolunteers(eventDate)
 	{
-		if (slot.slots.length === 0)
+		if (eventDate.timeSlots.length === 0)
 		{
 			throw new Error('Unexpected: Volunteer found but no time slots set.');
 		}
@@ -263,18 +263,18 @@ class InscriptionsParser
 			let slotCount = 0;
 			// Column E is index 3 in volRow.
 			// Map allocations to time slots (which start at index 3 of the data row).
-			for (let i = 0; i < slot.slots.length; i++)
+			for (let i = 0; i < eventDate.timeSlots.length; i++)
 			{
 				const allocationCell = volRow[3 + i];
 				const allocation = parseInt(allocationCell, 10) || 0;
 				if (allocation > 0)
 				{
-					totalDuration += allocation * slot.slots[i].duration;
+					totalDuration += allocation * eventDate.timeSlots[i].duration;
 					slotCount += allocation;
 				}
 			}
 			
-			slot.volunteers.push({
+			eventDate.volunteers.push({
 				name: volName,
 				organization: volOrg,
 				totalDuration: totalDuration,
@@ -283,6 +283,7 @@ class InscriptionsParser
 			this.rowIdx++;
 		}
 	}
+
 
 	_parseAddress(cp)
 	{
