@@ -48,7 +48,7 @@ function getVolunteerOrganizationMap()
 
 function _testParser()
 {
-	const parser = new InscriptionsParser('AppliCollecte-Inscriptions');
+	const parser = new RegistrationsParser('AppliCollecte-Inscriptions');
 	const data = parser.parse();
 }
 
@@ -62,7 +62,7 @@ const Section = {
 	UNKNOWN: 'UNKNOWN'
 };
 
-class InscriptionsParser
+class RegistrationsParser
 {
 	constructor(sheetName)
 	{

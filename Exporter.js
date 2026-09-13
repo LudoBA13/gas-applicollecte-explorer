@@ -59,7 +59,7 @@ function enrichManagersWithOrganization(parsedData)
 
 function updateDataTable()
 {
-	const parser = new InscriptionsParser('AppliCollecte-Inscriptions');
+	const parser = new RegistrationsParser('AppliCollecte-Inscriptions');
 	const data = parser.parse();
 	enrichManagersWithOrganization(data);
 	addManagersToVolunteers(data);
