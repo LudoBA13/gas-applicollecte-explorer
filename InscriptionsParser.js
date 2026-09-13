@@ -55,7 +55,7 @@ function _testParser()
 const Section = {
 	ADDRESS_HEADER: 'ADDRESS_HEADER',
 	ADDRESS: 'ADDRESS',
-	SECTOR_MANAGERS: 'SECTOR_MANAGERS',
+	AREA_MANAGERS: 'AREA_MANAGERS',
 	CP_MANAGERS: 'CP_MANAGERS',
 	DATE_SLOT: 'DATE_SLOT',
 	VOLUNTEERS_LIST: 'VOLUNTEERS_LIST',
@@ -73,7 +73,7 @@ class InscriptionsParser
 	{
 		const text = (cell === null || cell === undefined) ? '' : cell.toString().trim();
 		if (text === 'Adresse du Point de Collecte:') return Section.ADDRESS_HEADER;
-		if (this.isSectorManager(text)) return Section.SECTOR_MANAGERS;
+		if (this.isAreaManager(text)) return Section.AREA_MANAGERS;
 		if (this.isCPManager(text)) return Section.CP_MANAGERS;
 		if (this.isDateSlot(cell)) return Section.DATE_SLOT;
 		if (text === 'Nom du bénévole ou du responsable') return Section.VOLUNTEERS_LIST;
@@ -115,7 +115,7 @@ class InscriptionsParser
 		const cp = {
 			name: this.data[this.rowIdx][0].toString().trim(),
 			address: '',
-			sectorManagers: [],
+			areaManagers: [],
 			slots: []
 		};
 		this.rowIdx++;
@@ -143,8 +143,8 @@ class InscriptionsParser
 					this.rowIdx++;
 					this._parseAddress(cp);
 					break;
-				case Section.SECTOR_MANAGERS:
-					cp.sectorManagers = this._parseNamesFromColumnB(cellText);
+				case Section.AREA_MANAGERS:
+					cp.areaManagers = this._parseNamesFromColumnB(cellText);
 					this.rowIdx++;
 					break;
 				case Section.CP_MANAGERS:
@@ -313,7 +313,7 @@ class InscriptionsParser
 	}
 
 	// Helpers
-	isSectorManager(text) { return /^Responsable\s+secteur\s*:/i.test(text); }
+	isAreaManager(text) { return /^Responsable\s+secteur\s*:/i.test(text); }
 	isCPManager(text) { return /^Responsable\(s\)\s+PC\s*:/i.test(text); }
 	isDedicatedCPManager(text) { return /^Responsable\s+PC\s+dédié\s*:/i.test(text); }
 	isDateSlot(value) { return value instanceof Date; }

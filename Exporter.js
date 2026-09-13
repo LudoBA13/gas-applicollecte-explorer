@@ -35,7 +35,7 @@ function enrichManagersWithOrganization(parsedData)
 	parsedData.forEach(cp =>
 	{
 		// Enrich Sector Managers
-		cp.sectorManagers.forEach(mgr =>
+		cp.areaManagers.forEach(mgr =>
 		{
 			mgr.organization = orgMap[mgr.name] || '';
 		});
