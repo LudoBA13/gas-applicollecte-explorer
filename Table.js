@@ -1,10 +1,11 @@
-function ensureDataTable() 
+function ensureRegistrationsTable() 
 {
 	const ss = SpreadsheetApp.getActiveSpreadsheet();
-	const sheet = ss.getSheetByName('Data');
-	if (!sheet) 
+	const sheet = ss.getSheetByName('Registrations');
+
+	if (!sheet)
 	{
-		throw new Error("Sheet 'Data' not found.");
+		throw new Error("Sheet 'Registrations' not found.");
 	}
 
 	const lastRow = sheet.getLastRow();
@@ -36,7 +37,7 @@ function ensureDataTable()
 		{
 			if (s.tables) 
 			{
-				existingTable = s.tables.find(t => t.name === 'DataTable');
+				existingTable = s.tables.find(t => t.name === 'RegistrationsTable');
 				if (existingTable) 
 				{
 					break;
@@ -53,7 +54,7 @@ function ensureDataTable()
 			updateTable: {
 				table: {
 					tableId: existingTable.tableId,
-					name: 'DataTable',
+					name: 'RegistrationsTable',
 					range: targetRange
 				},
 				fields: 'range'
@@ -65,7 +66,7 @@ function ensureDataTable()
 		requests.push({
 			addTable: {
 				table: {
-					name: 'DataTable',
+					name: 'RegistrationsTable',
 					range: targetRange
 				}
 			}

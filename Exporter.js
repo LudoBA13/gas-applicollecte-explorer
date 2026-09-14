@@ -57,7 +57,7 @@ function enrichManagersWithOrganization(parsedData)
 	});
 }
 
-function updateDataTable()
+function updateRegistrationsTable()
 {
 	const parser = new RegistrationsParser('AppliCollecte-Inscriptions');
 	const data = parser.parse();
@@ -97,17 +97,17 @@ function resizeSheet(sheet, numRows, numCols)
 function exportRegistrationsToDataSheet(parsedData)
 {
 	const targetSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-	let dataSheet = targetSpreadsheet.getSheetByName('Data');
-	
+	let dataSheet = targetSpreadsheet.getSheetByName('Registrations');
+
 	if (!dataSheet)
 	{
-		dataSheet = targetSpreadsheet.insertSheet('Data');
+		dataSheet = targetSpreadsheet.insertSheet('Registrations');
 	}
-	
+
 	// const headers = ['Collection point', 'Date', 'Volunteer', 'Organization', 'Duration', 'Count'];
 	const headers = ['Point de Collection', 'Date', 'Nom / Groupe', 'Structure', 'Durée (heures)', 'Créneaux'];
 	const rows = [headers];
-	
+
 	parsedData.forEach(cp =>
 	{
 		cp.eventDates.forEach(slot =>
@@ -125,14 +125,14 @@ function exportRegistrationsToDataSheet(parsedData)
 			});
 		});
 	});
-	
+
 	if (rows.length > 0)
 	{
 		resizeSheet(dataSheet, rows.length, headers.length);
 		dataSheet.clear();
 		dataSheet.getRange(1, 1, rows.length, headers.length).setValues(rows);
 
-		// Handle DataTable
-		ensureDataTable();
+		// Handle RegistrationsTable
+		ensureRegistrationsTable();
 	}
 }

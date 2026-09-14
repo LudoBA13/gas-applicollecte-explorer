@@ -4,7 +4,7 @@ function onOpen()
 		.createMenu('AppliCollecte')
 		.addItem('Importer planning', 'showImportPlanningDialog')
 		.addItem('Importer utilisateurs', 'showImportUsersDialog')
-		.addItem('Mettre à jour la table de données', 'updateDataTable')
+		.addItem('Mettre à jour la table des inscriptions', 'updateRegistrationsTable')
 		.addToUi();
 }
 
