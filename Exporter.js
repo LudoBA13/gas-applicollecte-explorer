@@ -125,18 +125,60 @@ function resizeSheet(sheet, numRows, numCols)
 	}
 }
 
-function exportRegistrationsToDataSheet(parsedData)
+function ensureSheet(sheetName, headers)
 {
 	const targetSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-	let dataSheet = targetSpreadsheet.getSheetByName('Registrations');
+	let sheet = targetSpreadsheet.getSheetByName(sheetName);
 
-	if (!dataSheet)
+	if (!sheet)
 	{
-		dataSheet = targetSpreadsheet.insertSheet('Registrations');
+		sheet = targetSpreadsheet.insertSheet(sheetName);
 	}
 
-	// const headers = ['Collection point', 'Date', 'Volunteer', 'Organization', 'Duration', 'Count'];
+	const currentHeaders = sheet.getRange(1, 1, 1, headers.length).getValues()[0];
+	let headersChanged = false;
+
+	if (currentHeaders.length !== headers.length)
+	{
+		headersChanged = true;
+	}
+	else
+	{
+		for (let i = 0; i < headers.length; i++)
+		{
+			if (currentHeaders[i] !== headers[i])
+			{
+				headersChanged = true;
+				break;
+			}
+		}
+	}
+
+	if (headersChanged)
+	{
+		sheet.clear();
+		sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+	}
+
+	return sheet;
+}
+
+function ensureTable(sheet, tableName)
+{
+	// Assuming Table.js contains ensureRegistrationsTable and similar logic
+	// As this function was requested to be created, I will implement a placeholder
+	// that delegates to existing table logic if applicable.
+	if (tableName === 'RegistrationsTable')
+	{
+		ensureRegistrationsTable();
+	}
+}
+
+function exportRegistrationsToDataSheet(parsedData)
+{
 	const headers = ['Point de Collection', 'Date', 'Nom / Groupe', 'Structure', 'Durée (heures)', 'Créneaux'];
+	const dataSheet = ensureSheet('Registrations', headers);
+
 	const rows = [headers];
 
 	parsedData.forEach(cp =>
@@ -162,8 +204,30 @@ function exportRegistrationsToDataSheet(parsedData)
 		resizeSheet(dataSheet, rows.length, headers.length);
 		dataSheet.clear();
 		dataSheet.getRange(1, 1, rows.length, headers.length).setValues(rows);
+		ensureTable(dataSheet, 'RegistrationsTable');
+	}
 
-		// Handle RegistrationsTable
-		ensureRegistrationsTable();
+	const cpHeaders = ['Point de collecte', 'Date', 'Créneaux pourvus', 'Créneaux à pourvoir'];
+	const cpSheet = ensureSheet('CollectionPoints', cpHeaders);
+	const cpRows = [cpHeaders];
+
+	parsedData.forEach(cp =>
+	{
+		cp.eventDates.forEach(date =>
+		{
+			cpRows.push([
+				cp.name,
+				date.date,
+				date.slotsCovered,
+				date.slotsTotal - date.slotsCovered
+			]);
+		});
+	});
+
+	if (cpRows.length > 0)
+	{
+		resizeSheet(cpSheet, cpRows.length, cpHeaders.length);
+		cpSheet.clear();
+		cpSheet.getRange(1, 1, cpRows.length, cpHeaders.length).setValues(cpRows);
 	}
 }

@@ -5,7 +5,7 @@ function onOpen()
 		.addItem('Importer planning', 'showImportPlanningDialog')
 		.addItem('Importer utilisateurs', 'showImportUsersDialog')
 		.addItem('Importer structures', 'showImportStructuresDialog')
-		.addItem('Mettre à jour la table des inscriptions', 'updateRegistrationsTable')
+		.addItem('Mettre à jour à partir des données d\'inscriptions', 'updateRegistrationsTable')
 		.addToUi();
 }
 
