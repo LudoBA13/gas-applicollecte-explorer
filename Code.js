@@ -4,6 +4,7 @@ function onOpen()
 		.createMenu('AppliCollecte')
 		.addItem('Importer planning', 'showImportPlanningDialog')
 		.addItem('Importer utilisateurs', 'showImportUsersDialog')
+		.addItem('Importer structures', 'showImportStructuresDialog')
 		.addItem('Mettre à jour la table des inscriptions', 'updateRegistrationsTable')
 		.addToUi();
 }
@@ -16,6 +17,11 @@ function showImportPlanningDialog()
 function showImportUsersDialog()
 {
 	showImportDialog('importAppliCollecteUsers');
+}
+
+function showImportStructuresDialog()
+{
+	showImportDialog('importAppliCollecteStructures');
 }
 
 function showImportDialog(importFunctionName)

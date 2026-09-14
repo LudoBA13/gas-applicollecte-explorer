@@ -1,3 +1,43 @@
+function importAppliCollecteStructures(base64Data, fileName)
+{
+	const tempSpreadsheet = XlsxImporter.convertXlsxToSheets(base64Data, fileName);
+	try
+	{
+		const sourceSheet = tempSpreadsheet.getSheetByName('Structure');
+		if (!sourceSheet)
+		{
+			throw new Error("Sheet 'Structure' not found in the uploaded file.");
+		}
+
+		const data = sourceSheet.getDataRange().getValues();
+		const headers = data[0];
+		const nomIdx = headers.indexOf('Nom de la structure');
+		const typeIdx = headers.indexOf('Type');
+
+		if (nomIdx === -1 || typeIdx === -1)
+		{
+			throw new Error("Columns 'Nom de la structure' or 'Type' not found.");
+		}
+
+		const filteredData = data.map(row => [row[nomIdx], row[typeIdx]]);
+
+		const targetSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+		let targetSheet = targetSpreadsheet.getSheetByName('AppliCollecte-Structures');
+		if (!targetSheet)
+		{
+			targetSheet = targetSpreadsheet.insertSheet('AppliCollecte-Structures');
+		}
+
+		targetSheet.clear();
+		targetSheet.getRange(1, 1, filteredData.length, filteredData[0].length).setValues(filteredData);
+		resizeSheetToData(targetSheet, filteredData.length, filteredData[0].length);
+	}
+	finally
+	{
+		DriveApp.getFileById(tempSpreadsheet.getId()).setTrashed(true);
+	}
+}
+
 function importAppliCollectePlanning(base64Data, fileName)
 {
 	importAppliCollecte(base64Data, fileName, [
