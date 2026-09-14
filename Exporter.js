@@ -163,15 +163,82 @@ function ensureSheet(sheetName, headers)
 	return sheet;
 }
 
-function ensureTable(sheet, tableName)
+function ensureTable(sheetName, tableName)
 {
-	// Assuming Table.js contains ensureRegistrationsTable and similar logic
-	// As this function was requested to be created, I will implement a placeholder
-	// that delegates to existing table logic if applicable.
-	if (tableName === 'RegistrationsTable')
+	const ss = SpreadsheetApp.getActiveSpreadsheet();
+	const sheet = ss.getSheetByName(sheetName);
+
+	if (!sheet)
 	{
-		ensureRegistrationsTable();
+		throw new Error("Sheet '" + sheetName + "' not found.");
 	}
+
+	const lastRow = sheet.getLastRow();
+	const lastCol = sheet.getLastColumn();
+	if (lastRow === 0 || lastCol === 0)
+	{
+		return;
+	}
+
+	const spreadsheetId = ss.getId();
+	const sheetId = sheet.getSheetId();
+
+	const targetRange = {
+		sheetId: sheetId,
+		startRowIndex: 0,
+		endRowIndex: lastRow,
+		startColumnIndex: 0,
+		endColumnIndex: lastCol
+	};
+
+	const ssResource = Sheets.Spreadsheets.get(spreadsheetId, {
+		fields: 'sheets(tables)'
+	});
+
+	let existingTable = null;
+	if (ssResource.sheets)
+	{
+		for (const s of ssResource.sheets)
+		{
+			if (s.tables)
+			{
+				existingTable = s.tables.find(t => t.name === tableName);
+				if (existingTable)
+				{
+					break;
+				}
+			}
+		}
+	}
+
+	let requests = [];
+
+	if (existingTable)
+	{
+		requests.push({
+			updateTable: {
+				table: {
+					tableId: existingTable.tableId,
+					name: tableName,
+					range: targetRange
+				},
+				fields: 'range'
+			}
+		});
+	}
+	else
+	{
+		requests.push({
+			addTable: {
+				table: {
+					name: tableName,
+					range: targetRange
+				}
+			}
+		});
+	}
+
+	Sheets.Spreadsheets.batchUpdate({ requests: requests }, spreadsheetId);
 }
 
 function exportRegistrationsToDataSheet(parsedData)
@@ -204,7 +271,7 @@ function exportRegistrationsToDataSheet(parsedData)
 		resizeSheet(dataSheet, rows.length, headers.length);
 		dataSheet.clear();
 		dataSheet.getRange(1, 1, rows.length, headers.length).setValues(rows);
-		ensureTable(dataSheet, 'RegistrationsTable');
+		ensureTable(dataSheet.getName(), 'RegistrationsTable');
 	}
 
 	const cpHeaders = ['Point de collecte', 'Date', 'Créneaux pourvus', 'Créneaux à pourvoir'];
@@ -229,5 +296,6 @@ function exportRegistrationsToDataSheet(parsedData)
 		resizeSheet(cpSheet, cpRows.length, cpHeaders.length);
 		cpSheet.clear();
 		cpSheet.getRange(1, 1, cpRows.length, cpHeaders.length).setValues(cpRows);
+		ensureTable(cpSheet.getName(), 'CollectionPointsTable');
 	}
 }
