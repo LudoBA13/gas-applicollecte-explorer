@@ -63,7 +63,7 @@ function updateDataTable()
 	const data = parser.parse();
 	enrichManagersWithOrganization(data);
 	addManagersToVolunteers(data);
-	exportInscriptionsToDataSheet(data);
+	exportRegistrationsToDataSheet(data);
 }
 
 function resizeSheet(sheet, numRows, numCols)
@@ -94,7 +94,7 @@ function resizeSheet(sheet, numRows, numCols)
 	}
 }
 
-function exportInscriptionsToDataSheet(parsedData)
+function exportRegistrationsToDataSheet(parsedData)
 {
 	const targetSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 	let dataSheet = targetSpreadsheet.getSheetByName('Data');
