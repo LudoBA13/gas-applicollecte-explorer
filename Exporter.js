@@ -57,10 +57,41 @@ function enrichManagersWithOrganization(parsedData)
 	});
 }
 
+function aggregateSlots(parsedData)
+{
+	parsedData.forEach(cp =>
+	{
+		let cpSlotsTotal = 0;
+		let cpSlotsCovered = 0;
+
+		cp.eventDates.forEach(date =>
+		{
+			let slotsTotal = 0;
+			let slotsCovered = 0;
+
+			date.timeSlots.forEach(slot =>
+			{
+				slotsTotal += slot.volunteersNeeded;
+				slotsCovered += slot.volunteersProvided;
+			});
+
+			date.slotsTotal = slotsTotal;
+			date.slotsCovered = slotsCovered;
+
+			cpSlotsTotal += slotsTotal;
+			cpSlotsCovered += slotsCovered;
+		});
+
+		cp.cpSlotsTotal = cpSlotsTotal;
+		cp.cpSlotsCovered = cpSlotsCovered;
+	});
+}
+
 function updateRegistrationsTable()
 {
 	const parser = new RegistrationsParser('AppliCollecte-Inscriptions');
 	const data = parser.parse();
+	aggregateSlots(data);
 	enrichManagersWithOrganization(data);
 	addManagersToVolunteers(data);
 	exportRegistrationsToDataSheet(data);
