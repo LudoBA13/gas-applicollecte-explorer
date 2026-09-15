@@ -55,36 +55,27 @@ function importAppliCollecteUsers(base64Data, fileName)
 
 function importAppliCollecte(base64Data, fileName, sheetsToImport)
 {
-	const tempSpreadsheet = XlsxImporter.convertXlsxToSheets(base64Data, fileName);
-	try
+	const allData = XlsxImporter.loadDataFromXlsx(base64Data, fileName);
+	const targetSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+	
+	sheetsToImport.forEach(item => 
 	{
-		const targetSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-		
-		sheetsToImport.forEach(item => 
+		const values = allData[item.sourceName];
+		if (!values)
 		{
-			const sourceSheet = tempSpreadsheet.getSheetByName(item.sourceName);
-			if (!sourceSheet)
-			{
-				return;
-			}
-			
-			let targetSheet = targetSpreadsheet.getSheetByName(item.targetName);
-			if (!targetSheet)
-			{
-				targetSheet = targetSpreadsheet.insertSheet(item.targetName);
-			}
-			
-			targetSheet.clear();
-			const sourceRange = sourceSheet.getDataRange();
-			const values = sourceRange.getValues();
-			targetSheet.getRange(1, 1, values.length, values[0].length).setValues(values);
-			resizeSheetToData(targetSheet, values.length, values[0].length);
-		});
-	}
-	finally
-	{
-		DriveApp.getFileById(tempSpreadsheet.getId()).setTrashed(true);
-	}
+			return;
+		}
+
+		let targetSheet = targetSpreadsheet.getSheetByName(item.targetName);
+		if (!targetSheet)
+		{
+			targetSheet = targetSpreadsheet.insertSheet(item.targetName);
+		}
+
+		targetSheet.clear();
+		targetSheet.getRange(1, 1, values.length, values[0].length).setValues(values);
+		resizeSheetToData(targetSheet, values.length, values[0].length);
+	});
 }
 
 function resizeSheetToData(sheet, rows, cols)
