@@ -43,11 +43,45 @@ function getVolunteerOrganizationMap()
 		const row = data[i];
 		const lastName = row[nameIdx] || '';
 		const firstName = row[firstNameIdx] || '';
-		const structure = row[structureIdx] || '';
+		const fullName = `${lastName} ${firstName}`.trim();
+		map[fullName] = row[structureIdx] || '';
+	}
 
-		const fullName = (lastName + ' ' + firstName).trim();
+	return map;
+}
 
-		map[fullName] = structure;
+function getOrganizationTypeMap()
+{
+	const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('AppliCollecte-Structures');
+
+	if (!sheet)
+	{
+		return {};
+	}
+
+	const data = sheet.getDataRange().getValues();
+	if (data.length < 2)
+	{
+		return {};
+	}
+
+	const headers = data[0];
+	const nameIdx = headers.indexOf('Nom de la structure');
+	const typeIdx = headers.indexOf('Type');
+
+	if (nameIdx === -1 || typeIdx === -1)
+	{
+		return {};
+	}
+
+	const map = {};
+
+	for (let i = 1; i < data.length; i++)
+	{
+		const row = data[i];
+		const name = row[nameIdx] || '';
+		const type = row[typeIdx] || '';
+		map[name] = type;
 	}
 
 	return map;

@@ -243,9 +243,10 @@ function ensureTable(sheetName, tableName)
 
 function exportRegistrationsToDataSheet(parsedData)
 {
-	const headers = ['Point de Collection', 'Date', 'Nom / Groupe', 'Structure', 'Durée (heures)', 'Créneaux'];
+	const headers = ['Point de Collection', 'Date', 'Nom / Groupe', 'Structure', 'Type structure', 'Durée (heures)', 'Créneaux'];
 	const dataSheet = ensureSheet('Registrations', headers);
 
+	const orgTypeMap = getOrganizationTypeMap();
 	const rows = [headers];
 
 	parsedData.forEach(cp =>
@@ -254,11 +255,13 @@ function exportRegistrationsToDataSheet(parsedData)
 		{
 			slot.volunteers.forEach(vol =>
 			{
+				const orgType = orgTypeMap[vol.organization] || '';
 				rows.push([
 					cp.name,
 					slot.date,
 					vol.name,
 					vol.organization,
+					orgType,
 					vol.totalDuration,
 					vol.slotCount
 				]);
@@ -273,7 +276,10 @@ function exportRegistrationsToDataSheet(parsedData)
 		dataSheet.getRange(1, 1, rows.length, headers.length).setValues(rows);
 		ensureTable(dataSheet.getName(), 'RegistrationsTable');
 	}
+}
 
+function exportCollectionPointsToDataSheet(parsedData)
+{
 	const cpHeaders = ['Point de collecte', 'Date', 'Créneaux pourvus', 'Créneaux à pourvoir'];
 	const cpSheet = ensureSheet('CollectionPoints', cpHeaders);
 	const cpRows = [cpHeaders];
