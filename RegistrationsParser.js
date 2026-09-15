@@ -247,23 +247,20 @@ class RegistrationsParser
 
 	parseTimeSlotsSummary(label, colCount)
 	{
-		// Find requirements row. Look ahead until next header or end of volunteer list.
+		// Find requirements row. Look ahead until found or end of data.
 		let values = [];
 		for (let i = this.rowIdx; i < this.data.length; i++)
 		{
 			const rRow = this.data[i];
-			const rOrg = rRow[1] ? rRow[1].toString().trim() : '';
-			if (rOrg.includes(label))
+			const rColC = rRow[1] ? rRow[1].toString().trim() : '';
+
+			if (rColC === label)
 			{
 				for (let j = 0; j < colCount - 3; j++)
 				{
 					values.push(parseInt(rRow[3 + j], 10) || 0);
 				}
 				break; // Found it
-			}
-			if (rRow[0] !== '' && rRow[0] !== null)
-			{
-				break; // Hit another section
 			}
 		}
 		return values;
