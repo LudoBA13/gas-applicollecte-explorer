@@ -11,15 +11,15 @@ function importAppliCollecteStructures(base64Data, fileName)
 
 		const data = sourceSheet.getDataRange().getValues();
 		const headers = data[0];
-		const nomIdx = headers.indexOf('Nom de la structure');
+		const nameIdx = headers.indexOf('Nom de la structure');
 		const typeIdx = headers.indexOf('Type');
 
-		if (nomIdx === -1 || typeIdx === -1)
+		if (nameIdx === -1 || typeIdx === -1)
 		{
 			throw new Error("Columns 'Nom de la structure' or 'Type' not found.");
 		}
 
-		const filteredData = data.map(row => [row[nomIdx], row[typeIdx]]);
+		const filteredData = data.map(row => [row[nameIdx], row[typeIdx]]);
 
 		const targetSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 		let targetSheet = targetSpreadsheet.getSheetByName('AppliCollecte-Structures');
